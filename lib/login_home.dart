@@ -1,5 +1,9 @@
 import 'package:cv/info.dart';
+import 'package:cv/sign_up.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 
 class Login extends StatefulWidget {
   @override
@@ -12,10 +16,37 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _passwordVisible = false;
 
+  Future<void> _login() async {
+    // Proceed with signup
+    final response = await http.post(
+      Uri.parse('http://localhost/jayson/log_in.php'),
+      body: {
+        'username': _usernameController.text,
+        'password': _passwordController.text,
+      },
+    );
+
+      final result = jsonDecode(response.body);
+    if (response.statusCode == 200 && result['message'] == "Login successful") {
+      // Display a message to the user based on the response from the server
+      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Incorrect username or password'),
+                        ),
+                      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 123, 64, 231),
+      backgroundColor: Color.fromARGB(255, 81, 150, 146),
       appBar: AppBar(
         title: Text('Login'),
         backgroundColor: Color.fromARGB(141, 71, 244, 3),
@@ -86,24 +117,7 @@ class _LoginState extends State<Login> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Color.fromARGB(255, 217, 0, 255)),
                 onPressed: () {
-                  if (_formKey.currentState?.validate() == true) {
-                    // Check for specific username and password
-                    if (_usernameController.text == "lafortezajayson0@email.com" &&
-                        _passwordController.text == "Laforteza@123") {
-                      // Successful login
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                      );
-                    } else {
-                      // Incorrect username or password
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Incorrect username or password'),
-                        ),
-                      );
-                    }
-                  }
+                  _login();
                 },
                 child: Text(
                   'Login',
@@ -117,7 +131,7 @@ class _LoginState extends State<Login> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>HomeScreen()),
+                    MaterialPageRoute(builder: (context) =>SignupPage()),
                   );
                 },
                 child: Text('Sign Up'),
